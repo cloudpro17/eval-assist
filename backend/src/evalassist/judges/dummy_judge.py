@@ -3,10 +3,10 @@ from .types import (
     Criteria,
     DirectInstance,
     DirectInstanceResult,
-    DirectPositionalBias,
+    DirectPositionalBiasResult,
     PairwiseInstance,
     PairwiseInstanceResult,
-    SingleSystemPairwiseResult,
+    SingleSystemPairwiseInstanceResult,
 )
 
 
@@ -25,7 +25,7 @@ class DummyDirectJudge(BaseDirectJudge):
                 criteria=criteria[0],
                 option=criteria[0].options[0].name,
                 explanation="explanation",
-                positional_bias=DirectPositionalBias(
+                positional_bias=DirectPositionalBiasResult(
                     detected=False,
                 ),
             )
@@ -46,15 +46,24 @@ class DummyPairwiseJudge(BasePairwiseJudge):
         systems_per_instance = len(instances[0].responses)
         comparisons_per_instance = systems_per_instance - 1
         for i, instance in enumerate(instances):
-            instance_result: dict[str, SingleSystemPairwiseResult] = {}
-            instance_result[f"system_{i}"] = SingleSystemPairwiseResult(
-                contest_results=[True for _ in range(comparisons_per_instance)],
-                compared_to=[True for _ in range(comparisons_per_instance)],
-                explanations=["Explanations" for _ in range(comparisons_per_instance)],
-                positional_bias=[False for _ in range(comparisons_per_instance)],
-                winrate=1.0,
-                ranking=1,
-                selections=["1" for _ in range(comparisons_per_instance)],
+            instance_result: list[SingleSystemPairwiseInstanceResult] = []
+            instance_result.append(
+                SingleSystemPairwiseInstanceResult(
+                    contest_results=[True for _ in range(comparisons_per_instance)],
+                    compared_to=[True for _ in range(comparisons_per_instance)],
+                    explanations=[
+                        "Explanations" for _ in range(comparisons_per_instance)
+                    ],
+                    positional_bias=[False for _ in range(comparisons_per_instance)],
+                    winrate=1.0,
+                    ranking=1,
+                    selections=["1" for _ in range(comparisons_per_instance)],
+                )
             )
-            results.append(PairwiseInstanceResult(instance_result))
+            results.append(
+                PairwiseInstanceResult(
+                    option="0",
+                    per_system_results=instance_result,
+                )
+            )
         return results

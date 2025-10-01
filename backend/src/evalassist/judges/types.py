@@ -1,9 +1,9 @@
 import logging
 import math
 from abc import ABC, abstractmethod
-from typing import Any, Literal, cast
+from typing import Any, Generic, Literal, TypeVar, cast
 
-from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing_extensions import Self
 from unitxt.artifact import UnitxtArtifactNotFoundError, fetch_artifact
 from unitxt.llm_as_judge import Criteria as UnitxtCriteria
@@ -165,36 +165,53 @@ class Criteria(BaseModel):
         return self
 
 
-class SingleSystemPairwiseResult(BaseModel):
+class SingleSystemPairwiseInstanceResult(BaseModel):
     contest_results: list[bool]
     compared_to: list[int]
     explanations: list[str]
     positional_bias: list[bool] | None = None
-    certainty: list[float] | None = None
     winrate: float
     ranking: int
     selections: list[str]
 
 
-class PairwiseInstanceResult(RootModel):
-    root: dict[str, SingleSystemPairwiseResult]
+InstanceT = TypeVar("InstanceT", bound="Instance")
+ResultT = TypeVar("ResultT", bound="InstanceResult")
+PositionalBiasResultT = TypeVar("PositionalBiasResultT", bound="PositionalBiasResult")
 
 
-class DirectPositionalBias(BaseModel):
-    detected: bool
-    result: "DirectInstanceResult | None" = None
-
-
-class DirectInstanceResult(BaseModel):
+class InstanceResult(BaseModel, Generic[InstanceT, PositionalBiasResultT]):
     criteria: Criteria | None = None
-    instance: DirectInstance | None = None
-    option: str
-    score: float | None = None
-    explanation: str
-    feedback: str | None = None
+    instance: InstanceT | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-    positional_bias: DirectPositionalBias | None = None
+    option: str
+    explanation: str = ""
+    positional_bias: PositionalBiasResultT | None = None
 
+
+class PositionalBiasResult(BaseModel, Generic[ResultT]):
+    detected: bool
+    result: "ResultT | None" = None
+
+
+DirectPositionalBiasResult = PositionalBiasResult["DirectInstanceResult"]
+PairwisePositionalBiasResult = PositionalBiasResult["PairwiseInstanceResult"]
+
+
+class PairwiseInstanceResult(
+    InstanceResult[PairwiseInstance, PositionalBiasResult["PairwiseInstanceResult"]]
+):
+    per_system_results: list[SingleSystemPairwiseInstanceResult] | None = None
+
+
+class DirectInstanceResult(
+    InstanceResult[DirectInstance, PositionalBiasResult["DirectInstanceResult"]]
+):
+    score: float | None = None
+    feedback: str | None = None
+
+
+# Multi criteria types
 
 MultiCriteriaStrategy = Literal["target_option", "score_threshold", "none"]
 

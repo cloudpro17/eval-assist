@@ -19,13 +19,14 @@ from .types import (
     CriteriaOption,
     DirectInstance,
     DirectInstanceResult,
-    DirectPositionalBias,
+    DirectPositionalBiasResult,
     Instance,
     MultiCriteria,
     MultiCriteriaDirectInstanceResult,
     MultiCriteriaItemResult,
     PairwiseInstance,
     PairwiseInstanceResult,
+    PairwisePositionalBiasResult,
 )
 
 # ----------------------------------------------------------------------
@@ -240,7 +241,7 @@ class BaseDirectJudge(BaseJudge[DirectInstance, DirectInstanceResult], ABC):
                     explanation=results[i].explanation,
                     feedback=results[i].feedback,
                     metadata=results[i].metadata,
-                    positional_bias=DirectPositionalBias(
+                    positional_bias=DirectPositionalBiasResult(
                         detected=results[i].option != results[i + results_len].option,
                         result=results[results_len + i],
                     ),
@@ -451,18 +452,32 @@ class BasePairwiseJudge(BaseJudge[PairwiseInstance, PairwiseInstanceResult], ABC
             for instance_result, positional_bias_instance_result in zip(
                 results[:results_len], results[results_len:]
             ):
-                responses_count = len(instance_result.root)
-                for i, response_result in enumerate(instance_result.root.values()):
-                    positional_bias_result_response = list(
-                        positional_bias_instance_result.root.values()
-                    )[responses_count - i - 1]
-                    response_result.positional_bias = [
-                        a != b
-                        for a, b in zip(
-                            response_result.contest_results,
-                            reversed(positional_bias_result_response.contest_results),
-                        )
-                    ]
+                if (
+                    instance_result.per_system_results is not None
+                    and positional_bias_instance_result.per_system_results is not None
+                ):
+                    responses_count = len(instance_result.per_system_results)
+                    for i, response_result in enumerate(
+                        instance_result.per_system_results
+                    ):
+                        positional_bias_result_response = list(
+                            positional_bias_instance_result.per_system_results
+                        )[responses_count - i - 1]
+                        response_result.positional_bias = [
+                            a != b
+                            for a, b in zip(
+                                response_result.contest_results,
+                                reversed(
+                                    positional_bias_result_response.contest_results
+                                ),
+                            )
+                        ]
+
+                instance_result.positional_bias = PairwisePositionalBiasResult(
+                    detected=instance_result.option
+                    != positional_bias_instance_result.option,
+                    result=positional_bias_instance_result,
+                )
 
             return results
         else:

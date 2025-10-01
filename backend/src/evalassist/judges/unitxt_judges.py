@@ -31,7 +31,7 @@ from .types import (
     DirectInstanceResult,
     PairwiseInstance,
     PairwiseInstanceResult,
-    SingleSystemPairwiseResult,
+    SingleSystemPairwiseInstanceResult,
 )
 
 
@@ -205,20 +205,35 @@ class UnitxtPairwiseJudge(
         for row, instance in zip(dataset, instances):
             score = row["score"]["instance"]
 
-            row_score: dict[str, SingleSystemPairwiseResult] = {}
+            per_system_results: list[SingleSystemPairwiseInstanceResult] = []
             for key in score.keys():
                 outer_key = key.split("_")[0]
                 if outer_key not in ["score", "criteria"]:
-                    row_score[outer_key] = SingleSystemPairwiseResult(
-                        contest_results=score[f"{outer_key}_contest_results"],
-                        compared_to=score[f"{outer_key}_compared_to"],
-                        explanations=score[f"{outer_key}_assessments"],
-                        positional_bias=None,  # score[f"{outer_key}_positional_bias"], we calculate the positional bias outside unitxt now
-                        winrate=score[f"{outer_key}_winrate"],
-                        ranking=score[f"{outer_key}_ranking"],
-                        selections=score[f"{outer_key}_selections"],
+                    per_system_results.append(
+                        SingleSystemPairwiseInstanceResult(
+                            contest_results=score[f"{outer_key}_contest_results"],
+                            compared_to=score[f"{outer_key}_compared_to"],
+                            explanations=score[f"{outer_key}_assessments"],
+                            positional_bias=None,  # score[f"{outer_key}_positional_bias"], we calculate the positional bias outside unitxt now
+                            winrate=score[f"{outer_key}_winrate"],
+                            ranking=score[f"{outer_key}_ranking"],
+                            selections=score[f"{outer_key}_selections"],
+                        )
                     )
-            results.append(PairwiseInstanceResult(row_score))
+            results.append(
+                PairwiseInstanceResult(
+                    option=str(
+                        next(
+                            iter(
+                                i
+                                for i, r in enumerate(per_system_results)
+                                if r.ranking == 0
+                            )
+                        )
+                    ),
+                    per_system_results=per_system_results,
+                )
+            )
         return results
 
 
