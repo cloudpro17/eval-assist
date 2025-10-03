@@ -56,7 +56,7 @@ def test_main_judge():
         instances=instances, criteria=criteria
     )
 
-    assert results[0].option == "Excellent"
+    assert results[0].selected_option == "Excellent"
     assert cast(float, results[1].score) >= 0.5
     assert cast(float, results[2].score) == 0.0
     assert (
@@ -74,7 +74,7 @@ def test_judges_str_params():
         instances=["Refer to the DTO or visit the BO please"],
         criteria="Is the text self explainable?",
     )
-    assert results[0].option == "No"
+    assert results[0].selected_option == "No"
 
 
 @patch(

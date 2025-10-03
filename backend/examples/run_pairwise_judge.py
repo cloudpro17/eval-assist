@@ -24,7 +24,7 @@ results = judge(
 )
 
 print("### Selected option")
-print(f"{results[0].option}")
+print(f"{results[0].selected_option}")
 """
 tie
 """

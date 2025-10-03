@@ -172,7 +172,7 @@ class SingleSystemPairwiseInstanceResult(BaseModel):
     positional_bias: list[bool] | None = None
     winrate: float
     ranking: int
-    selections: list[str]
+    selections: list[int]
 
 
 InstanceT = TypeVar("InstanceT", bound="Instance")
@@ -184,7 +184,7 @@ class InstanceResult(BaseModel, Generic[InstanceT, PositionalBiasResultT]):
     criteria: Criteria | None = None
     instance: InstanceT | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-    option: str
+    selected_option: str
     explanation: str = ""
     positional_bias: PositionalBiasResultT | None = None
 
@@ -270,7 +270,7 @@ class MultiCriteriaItem(BaseModel):
             return None
 
         if self.target_option is not None:
-            score = 1.0 if result.option == self.target_option else 0.0
+            score = 1.0 if result.selected_option == self.target_option else 0.0
 
         elif self.score_threshold is not None:
             if score is None:
@@ -292,7 +292,7 @@ class MultiCriteriaItem(BaseModel):
             weight=weight,
             score=score,
             weighted_score=score * weight if score is not None else None,
-            option=result.option,
+            option=result.selected_option,
             strategy=self.get_strategy(),
             required=self.required,
         )

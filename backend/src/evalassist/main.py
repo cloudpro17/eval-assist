@@ -335,7 +335,10 @@ async def evaluate(
                 prediction_field=req.criteria.prediction_field,
                 context_fields=req.criteria.context_fields,
             )
-            evaluator = UnitxtPairwiseJudge(inference_engine=inference_engine)
+            evaluator = UnitxtPairwiseJudge(
+                inference_engine=inference_engine,
+                check_positional_bias=True,
+            )
 
             per_instance_result = evaluator.evaluate(
                 instances=cast(list[PairwiseInstance], req.instances),

@@ -336,7 +336,7 @@ class PairwiseJudge(BasePairwiseJudge, UnitxtInferenceLangchainRunnable):
             PairwiseInstanceResult(
                 instance=instance,
                 criteria=criterion,
-                option=selected_option,
+                selected_option=selected_option,
                 explanation=explanation,
                 metadata={
                     **parsing_metadata,

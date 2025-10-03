@@ -552,7 +552,7 @@ class DirectJudge(BaseDirectJudge, UnitxtInferenceLangchainRunnable):
             DirectInstanceResult(
                 instance=instance,
                 criteria=criterion,
-                option=selected_option,
+                selected_option=selected_option,
                 explanation=explanation,
                 feedback=feedback,
                 # score=next(iter(option.name for option in criterion.options if option.name == selected_option)).score,
@@ -730,7 +730,7 @@ class DirectJudge(BaseDirectJudge, UnitxtInferenceLangchainRunnable):
 
         return [
             DirectInstanceResult(
-                option=selected_option,
+                selected_option=selected_option,
                 score=float(selected_option) if is_float(selected_option) else None,
                 explanation=explanation,
                 metadata={

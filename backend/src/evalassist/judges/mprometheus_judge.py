@@ -92,7 +92,7 @@ class MPrometheusDirectJudge(MPrometheusJudge, BaseDirectJudge):
             DirectInstanceResult(
                 instance=instance,
                 criteria=criterion,
-                option=criterion.options[score - 1].name,
+                selected_option=criterion.options[score - 1].name,
                 score=score,
                 explanation=feedback,
             )

@@ -23,7 +23,7 @@ class DummyDirectJudge(BaseDirectJudge):
             DirectInstanceResult(
                 instance=instances[0],
                 criteria=criteria[0],
-                option=criteria[0].options[0].name,
+                selected_option=criteria[0].options[0].name,
                 explanation="explanation",
                 positional_bias=DirectPositionalBiasResult(
                     detected=False,
@@ -62,7 +62,7 @@ class DummyPairwiseJudge(BasePairwiseJudge):
             )
             results.append(
                 PairwiseInstanceResult(
-                    option="0",
+                    selected_option="0",
                     per_system_results=instance_result,
                 )
             )
